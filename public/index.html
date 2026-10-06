@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dhan F&O Intraday Desk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-block">
+          <div class="brand-mark">D</div>
+          <div>
+            <div class="brand-title" id="brandTitle">Dhan</div>
+            <div class="brand-subtitle" id="brandSubtitle">Intraday Desk</div>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <button class="nav-item active" data-target="overview">Overview</button>
+          <button class="nav-item" data-target="scanner">Scanner</button>
+          <button class="nav-item" data-target="fno-setup">F&amp;O Setup</button>
+          <button class="nav-item" data-target="trades">Trades</button>
+          <button class="nav-item" data-target="risk">Risk</button>
+          <button class="nav-item" data-target="settings">Settings</button>
+        </nav>
+
+        <div class="status-card">
+          <div class="mini-label">Connection</div>
+          <div class="status-row">
+            <span class="green-dot"></span>
+            <span id="connectionStatus">Not connected</span>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-panel" id="overview">
+        <header class="topbar">
+          <div>
+            <div class="eyebrow" id="marketDataStatus">Waiting for Dhan connection</div>
+            <h1>15-minute F&O intraday system</h1>
+          </div>
+          <div class="top-actions">
+            <div class="mode-switch" role="group" aria-label="Trading mode">
+              <button type="button" id="paperModeButton" class="mode-button active" aria-pressed="true">Paper</button>
+              <button type="button" id="liveModeButton" class="mode-button" aria-pressed="false">Live</button>
+            </div>
+            <button type="button" class="ghost-btn" id="disconnectButton" hidden>Disconnect</button>
+          </div>
+        </header>
+
+        <section class="metrics-grid">
+          <div class="metric-card accent">
+            <div class="metric-label">Daily P&L</div>
+              <div class="metric-value green" id="dailyPnl">--</div>
+            <div class="metric-foot">Intraday</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Active trades</div>
+              <div class="metric-value" id="activeTradeCount">--</div>
+            <div class="metric-foot">Max 5 concurrent</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Account status</div>
+              <div class="metric-value" id="connectionMetric">Offline</div>
+              <div class="metric-foot">Dhan account status</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Capital in play</div>
+              <div class="metric-value" id="capitalInPlay">--</div>
+              <div class="metric-foot">Dhan available balance</div>
+          </div>
+        </section>
+
+        <section class="strategy-strip">
+          <div class="strategy-card">
+            <div class="strategy-title">EMA 21/34</div>
+            <div class="strategy-body">Bullish crossover only. Long only when 21 > 34 and price is above VWAP.</div>
+          </div>
+          <div class="strategy-card">
+            <div class="strategy-title">Supertrend</div>
+            <div class="strategy-body">Trend confirmation on 15m. Only take trades in direction of trend.</div>
+          </div>
+          <div class="strategy-card">
+            <div class="strategy-title">VWAP</div>
+            <div class="strategy-body">Prefer mean-reversion or continuation only if price respects VWAP structure.</div>
+          </div>
+          <div class="strategy-card warning" id="risk">
+            <div class="strategy-title">Risk rules</div>
+            <div class="strategy-body">No fresh entries after 2:00 PM. No trade in the last week of expiry; rollover to the next monthly contract.</div>
+          </div>
+        </section>
+
+        <section class="content-grid">
+          <div class="panel large-panel">
+            <div class="panel-head">
+              <h2>Market snapshot</h2>
+              <div class="badge">15m</div>
+            </div>
+            <div class="chart-box market-snapshot">
+              <div><span>Underlying</span><strong id="snapshotSymbol">--</strong></div>
+              <div><span>Last price</span><strong id="snapshotPrice">--</strong></div>
+              <div><span>EMA 21 / 34</span><strong id="snapshotEma">--</strong></div>
+              <div><span>VWAP</span><strong id="snapshotVwap">--</strong></div>
+              <div><span>Supertrend</span><strong id="snapshotTrend">--</strong></div>
+              <div><span>Signal</span><strong id="snapshotSignal">Waiting for connection</strong></div>
+              <div class="snapshot-time" id="snapshotTime">15-minute candles are sourced from Dhan.</div>
+            </div>
+          </div>
+
+          <div class="panel form-panel" id="settings">
+            <div class="panel-head">
+                <h2>Dhan account</h2>
+            </div>
+            <form id="connectForm" class="form-grid">
+              <label>
+                Client ID
+                <input type="text" id="clientId" placeholder="Dhan Client ID" autocomplete="off" required />
+              </label>
+              <label>
+                Access token
+                <input type="password" id="accessToken" placeholder="Dhan access token" autocomplete="new-password" required />
+              </label>
+              <button type="submit" class="primary-btn full">Verify and connect</button>
+            </form>
+            <div id="connectMessage" class="message neutral">Credentials stay in server memory and clear when the server restarts.</div>
+          </div>
+        </section>
+
+        <section class="scanner-grid" id="scanner">
+          <div class="panel scanner-panel">
+            <div class="panel-head">
+              <h2>F&O scanner</h2>
+              <div class="scan-controls">
+                <span class="small-pill">15m timeframe</span>
+                <button class="ghost-btn small" id="refreshScanner">Refresh</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Symbol</th>
+                    <th>Price</th>
+                    <th>VWAP</th>
+                    <th>Trend</th>
+                    <th>Setup</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="scannerRows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel trade-panel" id="fno-setup">
+            <div class="panel-head">
+              <h2>Trade planner</h2>
+              <label class="auto-trade-control" for="autoTradeToggle">
+                <span id="autoTradeLabel">Auto trade off</span>
+                <span class="toggle">
+                  <input id="autoTradeToggle" type="checkbox" />
+                  <span class="slider"></span>
+                </span>
+              </label>
+            </div>
+
+            <form id="tradeForm" class="form-grid compact">
+              <label>
+                Symbol
+                <input type="text" id="tradeSymbol" value="RELIANCE" />
+              </label>
+              <label>
+                Strategy
+                <select id="strategySelect">
+                  <option value="EMA 21/34 + Supertrend + VWAP">EMA 21/34 + Supertrend + VWAP</option>
+                  <option value="VWAP + Supertrend continuation">VWAP + Supertrend continuation</option>
+                  <option value="Option selling breakout fade">Option selling breakout fade</option>
+                </select>
+              </label>
+              <label>
+                Lot size
+                <input type="number" id="lotSize" value="1" min="1" />
+              </label>
+              <label>
+                Max trades
+                <input type="number" id="maxTrades" value="5" min="1" max="5" />
+              </label>
+              <label>
+                Stop loss (%)
+                <input type="number" id="stopLoss" value="1.2" step="0.1" />
+              </label>
+              <label>
+                Target (%)
+                <input type="number" id="target" value="3.0" step="0.1" />
+              </label>
+              <label>
+                Trailing stop after profit (%)
+                <input type="number" id="trailingStop" value="15" step="0.5" />
+              </label>
+              <button type="submit" class="primary-btn full">Apply order settings</button>
+            </form>
+            <div id="tradeMessage" class="message neutral">Every order requires a preview and your confirmation.</div>
+          </div>
+        </section>
+
+        <section class="panel" id="trades">
+          <div class="panel-head">
+            <h2>Position book</h2>
+            <span class="small-pill" id="positionSummary">0 open trades</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Symbol</th>
+                  <th>Side</th>
+                  <th>Quantity</th>
+                  <th>Average</th>
+                  <th>P&amp;L</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="positionRows"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="orderPreviewDialog" class="order-dialog">
+      <form method="dialog" class="dialog-content">
+        <div class="panel-head">
+          <h2 id="previewTitle">Order preview</h2>
+          <button type="submit" class="ghost-btn small" aria-label="Close order preview">Close</button>
+        </div>
+        <div id="previewDetails" class="preview-details"></div>
+        <p id="previewWarning" class="message neutral"></p>
+        <div class="dialog-actions">
+          <button type="button" id="cancelPreview" class="ghost-btn">Cancel</button>
+          <button type="button" id="confirmPreview" class="primary-btn">Confirm paper order</button>
+        </div>
+      </form>
+    </dialog>
+    <script src="/app.js"></script>
+  </body>
+</html>
